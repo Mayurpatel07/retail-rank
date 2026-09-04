@@ -93,3 +93,68 @@ export async function login(req, res, next) {
     next(error);
   }
 }
+
+export async function getMe(req, res, next) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        address: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function changePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const validPassword = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash
+    );
+
+    if (!validPassword) {
+      return res.status(401).json({
+        message: "Current password is incorrect",
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    res.json({
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}

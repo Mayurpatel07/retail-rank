@@ -6,6 +6,8 @@ import { authorize } from "./middleware/role.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import storeRoutes from "./modules/stores/store.routes.js";
 import ratingRoutes from "./modules/ratings/rating.routes.js";
+import ownerRoutes from "./modules/owner/owner.routes.js";
+import { errorHandler } from "./middleware/error.js";
 
 const app = express();
 
@@ -14,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/stores", storeRoutes);
 app.use("/api", ratingRoutes);
+app.use("/api/owner", ownerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.get("/api/health", (req, res) => {
@@ -37,5 +40,5 @@ app.get(
     });
   }
 );
-
+app.use(errorHandler);
 export default app;

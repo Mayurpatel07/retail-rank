@@ -14,6 +14,11 @@ export const signupSchema = z.object({
   password: passwordSchema,
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: passwordSchema,
+});
+
 export const loginSchema = z.object({
   email: z.string().trim().email(),
   password: z.string().min(1),

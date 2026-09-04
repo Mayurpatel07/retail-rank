@@ -1,6 +1,16 @@
 import { Router } from "express";
-import { login, signup } from "./auth.controller.js";
-import { loginSchema, signupSchema } from "./auth.validation.js";
+import {
+  changePassword,
+  getMe,
+  login,
+  signup,
+} from "./auth.controller.js";
+import {
+  changePasswordSchema,
+  loginSchema,
+  signupSchema,
+} from "./auth.validation.js";
+import { authenticate } from "../../middleware/auth.js";
 
 const router = Router();
 
@@ -30,6 +40,22 @@ router.post("/login", (req, res, next) => {
 
   req.body = result.data;
   login(req, res, next);
+});
+
+router.get("/me", authenticate, getMe);
+
+router.patch("/password", authenticate, (req, res, next) => {
+  const result = changePasswordSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({
+      message: "Validation failed",
+      errors: result.error.flatten().fieldErrors,
+    });
+  }
+
+  req.body = result.data;
+  changePassword(req, res, next);
 });
 
 export default router;
